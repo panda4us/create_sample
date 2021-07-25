@@ -8,7 +8,7 @@ data=pd.DataFrame([], columns=['Date','Market','Capital_used','ROI','Profit_Loss
                             'Loosing_trades','Targets_met','Stoplosses_hit','broker_name','segment','trade_type','long_short','hourly_slots',
                             'pre_planned_or_adhoc','strategy_id'])
 
-
+##create random variables
 for ind in range(5000):
     df_row ={}
     df_row['Date'] = (dt.date(2021, 4, 1)+dt.timedelta(rd.randint(0,112))).strftime("%d/%m/%Y")
@@ -32,14 +32,16 @@ for ind in range(5000):
     df_row['strategy_id']=rd.randint(1, 10)
     data=data.append(df_row,ignore_index=True)
 
-
+#get an average Profit_Loss and Capital_used per day
 data['Capital_used']=data['Capital_used'].astype(int)
 tmp=data[["Date",'Profit_Loss','Capital_used']].groupby(by=["Date"]).mean()
+
+#Calculate average ROI per day
 tmp['ROI']=(tmp['Profit_Loss']/tmp['Capital_used']*100).round(2)
 tmp=tmp.reset_index()
-for date_ in tmp['Date']:
-    data.loc[data['Date']==date_,'ROI']=tmp.loc[tmp['Date']==date_,'ROI'].to_numpy()
-    
 
+#update ROI in the main table
+data['ROI']=data.apply(lambda x: tmp.loc[tmp['Date']==x['Date'],'ROI'].to_numpy()[0], axis = 1)    
 
+#Save file as CSV
 data.to_csv("5000_sample.csv")
